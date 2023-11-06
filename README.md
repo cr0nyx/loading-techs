@@ -48,6 +48,10 @@ Originaly, I wanted to store only Sharp examples, but when I realised that It'll
 ### Done
 1. Dll Injectors
     - Classic
+2. Shellcode Injectors
+    - Classic
+3. Shellcode Runners
+    - Classic
 ### TODO
 1. Dll Injectors
     - Reflective DLL Injection
@@ -56,7 +60,6 @@ Originaly, I wanted to store only Sharp examples, but when I realised that It'll
 2. Sharp Runners
     - Custom Garbage Collector
 3. Shellcode Injectors
-    - Classic
     - Process Hollowing
     - Process Doppelganging
     - Process Ghosting
@@ -68,7 +71,6 @@ Originaly, I wanted to store only Sharp examples, but when I realised that It'll
     - Atom Bombing
     - SetWindowsHook
 4. Shellcode Runners
-    - Classic
     - Local Thread Hijacking
     - CreateThreadpoolWait
     - Run code from .text section without Win API
