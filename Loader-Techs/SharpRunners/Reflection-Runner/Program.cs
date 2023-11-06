@@ -1,6 +1,6 @@
 ﻿using System.Reflection;
 
-namespace ReflectionRunner
+namespace Reflection_Runner
 {
     internal class Program
     {
