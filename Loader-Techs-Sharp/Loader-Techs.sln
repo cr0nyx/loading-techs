@@ -27,6 +27,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Thread-Hijacking-Runner", "
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Thread-Hijacking-Injector", "Shellcode-Injectors\Thread-Hijacking-Injector\Thread-Hijacking-Injector.csproj", "{75D68261-AA74-4891-AF75-B983993A247B}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NtQuaro-Injector", "Shellcode-Injectors\NtQuaro-Injector\NtQuaro-Injector.csproj", "{C410F8B7-912E-418F-85E8-67C8790C1075}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CreateThreadpoolWait-Runner", "Shellcode-Runners\CreateThreadpoolWait-Runner\CreateThreadpoolWait-Runner.csproj", "{92E5FBD0-7FB5-491F-9C4F-30ED6E222275}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -99,6 +103,22 @@ Global
 		{75D68261-AA74-4891-AF75-B983993A247B}.Release|Any CPU.Build.0 = Release|Any CPU
 		{75D68261-AA74-4891-AF75-B983993A247B}.Release|x64.ActiveCfg = Release|x64
 		{75D68261-AA74-4891-AF75-B983993A247B}.Release|x64.Build.0 = Release|x64
+		{C410F8B7-912E-418F-85E8-67C8790C1075}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C410F8B7-912E-418F-85E8-67C8790C1075}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C410F8B7-912E-418F-85E8-67C8790C1075}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{C410F8B7-912E-418F-85E8-67C8790C1075}.Debug|x64.Build.0 = Debug|Any CPU
+		{C410F8B7-912E-418F-85E8-67C8790C1075}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C410F8B7-912E-418F-85E8-67C8790C1075}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C410F8B7-912E-418F-85E8-67C8790C1075}.Release|x64.ActiveCfg = Release|x64
+		{C410F8B7-912E-418F-85E8-67C8790C1075}.Release|x64.Build.0 = Release|x64
+		{92E5FBD0-7FB5-491F-9C4F-30ED6E222275}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{92E5FBD0-7FB5-491F-9C4F-30ED6E222275}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{92E5FBD0-7FB5-491F-9C4F-30ED6E222275}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{92E5FBD0-7FB5-491F-9C4F-30ED6E222275}.Debug|x64.Build.0 = Debug|Any CPU
+		{92E5FBD0-7FB5-491F-9C4F-30ED6E222275}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{92E5FBD0-7FB5-491F-9C4F-30ED6E222275}.Release|Any CPU.Build.0 = Release|Any CPU
+		{92E5FBD0-7FB5-491F-9C4F-30ED6E222275}.Release|x64.ActiveCfg = Release|x64
+		{92E5FBD0-7FB5-491F-9C4F-30ED6E222275}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -112,6 +132,8 @@ Global
 		{3FBF8BFC-67AB-4437-965A-FD0BB8A1B2C7} = {9A764BC6-C1F5-47E9-B13A-A782EF951EBA}
 		{8AD8D4E0-413C-46A9-B122-D3E791E98F74} = {9A764BC6-C1F5-47E9-B13A-A782EF951EBA}
 		{75D68261-AA74-4891-AF75-B983993A247B} = {BD59B440-13A9-4BF9-A2F2-E6BAD8FB3FD7}
+		{C410F8B7-912E-418F-85E8-67C8790C1075} = {BD59B440-13A9-4BF9-A2F2-E6BAD8FB3FD7}
+		{92E5FBD0-7FB5-491F-9C4F-30ED6E222275} = {9A764BC6-C1F5-47E9-B13A-A782EF951EBA}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {FC938957-06AD-4026-A918-A78C83102E9B}

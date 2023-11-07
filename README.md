@@ -8,16 +8,18 @@ Originaly, I wanted to store only Sharp examples, but when I realised that It'll
 ### Done
 1. DLL Injectors
     - Classic (?)
-2. Sharp Runners
-    - Reflection-Runner (Assembly.Load)
-    - Sharp-Runner (with Delegate)
-3. Shellcode Injectors
+2. Shellcode Injectors
     - Classic
-    - Process Hollowing
     - Thread Hijacking (If there is only main thread, the target program will not respond)
-4. Shellcode Runners
+    - Native API quadro (Inter-Process Mapped View)
+    - Process Hollowing
+3. Shellcode Runners
     - Classic
     - Local Thread Hijacking (If Binary was built as Debug, it'll not work. But in other cases, it works perfectly)
+    - CreateThreadpoolWait
+4. Sharp Runners
+    - Reflection-Runner (Assembly.Load)
+    - Sharp-Runner (with Delegate)
 
 ### TODO
 1. Dll Injectors
@@ -37,7 +39,6 @@ Originaly, I wanted to store only Sharp examples, but when I realised that It'll
     - Atom Bombing
     - SetWindowsHook
 4. Shellcode Runners
-    - CreateThreadpoolWait
     - Run code from .text section without Win API
     - Inline Execution in C/C++
     - Avoiding RWX memory sections with AddressOfEntryPoint
