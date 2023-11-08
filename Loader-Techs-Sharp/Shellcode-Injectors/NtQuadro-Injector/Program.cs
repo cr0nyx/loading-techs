@@ -5,7 +5,7 @@ using System.Runtime.InteropServices;
 
 // Code was taken from here - https://ppn.snovvcrash.rocks/red-team/maldev/code-injection/process-injectors and was slightly modified
 
-namespace NtQuaro_Injector
+namespace NtQuadro_Injector
 {
     internal class Program
     {
