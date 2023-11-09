@@ -13,6 +13,7 @@ Originaly, I wanted to store only Sharp examples, but when I realised that It'll
     - Remote Thread Hijacking (If there is only main thread, the target program will not respond)
     - Native API quadro (Inter-Process Mapped View)
     - Asychronous Procedure Call Injection (not any process calls APC, notepad as example)
+    - Atom Bombing (I'm not sure that it works properly)
     - Process Hollowing
 3. Shellcode Runners
     - Classic
@@ -30,15 +31,13 @@ Originaly, I wanted to store only Sharp examples, but when I realised that It'll
     - Shellcode Reflective DLL Injection
     - Module Stomping
 2. Shellcode Injectors
-    - Atom Bombing
-    - SetWindowsHook
     - Process Doppelganging
     - Process Ghosting
     - Process Herpaderping
     - Dirty Vanity
-    - Avoiding RWX memory sections with AddressOfEntryPoint
 3. Advanced Runners
     - Thread Stack Spoofing / Call Stack Spoofing
+    - Avoiding RWX memory sections with AddressOfEntryPoint
 
 ## C++
 
