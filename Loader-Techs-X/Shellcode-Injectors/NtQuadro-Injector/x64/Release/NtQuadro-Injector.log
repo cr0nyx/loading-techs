@@ -1,0 +1,8 @@
+﻿  NtQuadro-Injector.cpp
+C:\Users\user\source\repos\loading-techs\Loader-Techs-X\Shellcode-Injectors\NtQuadro-Injector\NtQuadro-Injector.cpp(58,32): warning C4838: conversion from 'SIZE_T' to 'DWORD' requires a narrowing conversion
+C:\Users\user\source\repos\loading-techs\Loader-Techs-X\Shellcode-Injectors\NtQuadro-Injector\NtQuadro-Injector.cpp(58,32): warning C4244: 'initializing': conversion from 'SIZE_T' to 'DWORD', possible loss of data
+  Generating code
+  Previous IPDB not found, fall back to full compilation.
+  All 1 functions were compiled because no usable IPDB/IOBJ from previous compilation was found.
+  Finished generating code
+  NtQuadro-Injector.vcxproj -> C:\Users\user\source\repos\loading-techs\Loader-Techs-X\x64\Release\NtQuadro-Injector.exe

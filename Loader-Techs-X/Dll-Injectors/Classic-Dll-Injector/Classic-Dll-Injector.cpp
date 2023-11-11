@@ -2,6 +2,8 @@
 #include <iostream>
 #include <windows.h>
 
+// original code - https://www.ired.team/offensive-security/code-injection-process-injection/dll-injection
+
 int main(int argc, char* argv[])
 {
 	HANDLE processHandle;

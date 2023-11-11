@@ -1,0 +1,7 @@
+﻿  IAT-Hooking-Runner.cpp
+C:\Users\user\source\repos\loading-techs\Loader-Techs-X\Shellcode-Runners\IAT-Hooking-Runner\IAT-Hooking-Runner.cpp(79,17): warning C4312: 'type cast': conversion from '__unaligned DWORD' to 'LPCSTR' of greater size
+  Generating code
+  Previous IPDB not found, fall back to full compilation.
+  All 68 functions were compiled because no usable IPDB/IOBJ from previous compilation was found.
+  Finished generating code
+  IAT-Hooking-Runner.vcxproj -> C:\Users\user\source\repos\loading-techs\Loader-Techs-X\x64\Release\IAT-Hooking-Runner.exe

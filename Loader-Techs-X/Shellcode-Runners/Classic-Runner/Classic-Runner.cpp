@@ -1,6 +1,8 @@
 #include <iostream>
 #include "windows.h"
 
+// original code - https://www.ired.team/offensive-security/code-injection-process-injection/local-shellcode-execution-without-windows-apis
+
 int main()
 {
     // put your shellcode here

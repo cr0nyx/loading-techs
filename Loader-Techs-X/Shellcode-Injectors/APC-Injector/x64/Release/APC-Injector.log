@@ -1,0 +1,6 @@
+﻿  APC-Injector.cpp
+  Generating code
+  Previous IPDB not found, fall back to full compilation.
+  All 70 functions were compiled because no usable IPDB/IOBJ from previous compilation was found.
+  Finished generating code
+  APC-Injector.vcxproj -> C:\Users\user\source\repos\loading-techs\Loader-Techs-X\x64\Release\APC-Injector.exe
