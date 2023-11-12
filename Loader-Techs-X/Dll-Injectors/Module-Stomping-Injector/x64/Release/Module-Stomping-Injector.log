@@ -1,0 +1,8 @@
+﻿  Module-Stomping-Injector.cpp
+C:\Users\user\source\repos\loading-techs\Loader-Techs-X\Dll-Injectors\Module-Stomping-Injector\Module-Stomping-Injector.cpp(72,45): warning C4244: 'argument': conversion from 'SIZE_T' to 'DWORD', possible loss of data
+  Generating code
+  1 of 74 functions ( 1.4%) were compiled, the rest were copied from previous compilation.
+    0 functions were new in current compilation
+    0 functions had inline decision re-evaluated but remain unchanged
+  Finished generating code
+  Module-Stomping-Injector.vcxproj -> C:\Users\user\source\repos\loading-techs\Loader-Techs-X\x64\Release\Module-Stomping-Injector.exe
